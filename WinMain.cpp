@@ -1,4 +1,6 @@
 #include <Windows.h>
+#include <windowsx.h>
+#include <iostream>
 
 /*
 * Window procedure
@@ -9,6 +11,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 	case WM_CLOSE: 
 		PostQuitMessage(313); // tell the window to close the program when 'X' button is clicked
+		break;
+	case WM_KEYDOWN: // keystroke input
+		if (wparam == 'F') {
+			SetWindowText(hwnd, (LPCSTR)"New Window Name");
+		}
+		break;
+	case WM_CHAR: // sequence of word input
+		break;
+	case WM_LBUTTONDBLCLK:
+		int x_pos{}, y_pos{};
+		x_pos = GET_X_LPARAM(lparam);
+		y_pos = GET_Y_LPARAM(lparam);
+		std::cout << x_pos << " -- " << y_pos << std::endl;
 		break;
 	}
 
