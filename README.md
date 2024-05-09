@@ -27,5 +27,12 @@ The vertex buffers for rendering was copied from System Memory into Video Memory
 4. Tell GPU to read those values
 5. Render the triangle
 
+**Steps To Render**
+_http://www.directxtutorial.com/Lesson.aspx?lessonid=11-4-5_
+1. Create *shader*			: tell the GPU that we want to render an image
+2. Create *vertex buffer*	: hold informations about the "image" that we want to render (position, color, etc)
+3. Create *input layout*	: combine the shader & vertex buffer in order to be able to render
+4. DRAW!
+
 
 

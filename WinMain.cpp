@@ -193,10 +193,11 @@ void RenderFrame(void)
 	devcon->IASetVertexBuffers(0, 1, &pVBuffer, &stride, &offset);
 
 	/* select primitive we are using */
-	devcon->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	//devcon->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // shows as triangle
+	devcon->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_LINESTRIP);	// shows as line
 
 	/* draw the vertex buffer */
-	devcon->Draw(3, 0);
+	devcon->Draw(4, 0);
 
 	swapchain->Present(0, 0);	// "swap" the backbuffer to the frontbuffer to be shown
 
@@ -235,8 +236,8 @@ void InitPipeline(void)
 	*/
 	D3D11_INPUT_ELEMENT_DESC ied[] =
 	{
-				{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-						{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	};
 	dev->CreateInputLayout(ied, 2, VS->GetBufferPointer(), VS->GetBufferSize(), &pLayout);
 	devcon->IASetInputLayout(pLayout);
@@ -245,11 +246,13 @@ void InitPipeline(void)
 void InitGraphic(void)
 {
 	/* the triangle vertices */
+	/* locations/coordinates are in X,Y,Z */
 	VERTEX OurVertices[] =
 	{
 		{0.0f, 0.5f, 0.9f, D3DXCOLOR(1.0f, 0.0f, 0.2f, 1.0f)},
 		{0.45f, -0.5, 0.0f, D3DXCOLOR(1.0f, 0.3f, 0.0f, 1.0f)},
-		{-0.45f, -0.5f, 0.0f, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)}
+		{-0.45f, -0.5f, 0.0f, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)},
+		{0.1f, -0.8f, 0.0f, D3DXCOLOR(0.0f, 0.5f, 1.0f, 1.0f)}
 	};
 
 	/* create vertex buffer */
@@ -257,7 +260,7 @@ void InitGraphic(void)
 	ZeroMemory(&bd, sizeof(bd));
 
 	bd.Usage = D3D11_USAGE_DYNAMIC;
-	bd.ByteWidth = sizeof(VERTEX) * 3;
+	bd.ByteWidth = sizeof(VERTEX) * 4;
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
