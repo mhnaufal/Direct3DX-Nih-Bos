@@ -1,36 +1,4 @@
-/*
-* Include files
-*/
-// Window 
-#include <Windows.h>
-#include <windowsx.h>
-
-// DirectX11
-#include <d3d11.h> // Direct3D 11 main library (mandatory)
-#include <d3dx11.h> // Direct3D 11 extension library (optional)
-#include <d3dx10.h> // Direct3D 10 extension library (optional)
-
-#pragma comment (lib, "d3d11.lib") // include the Direct3D 11 lib to our executable
-#pragma comment (lib, "d3dx11.lib") 
-#pragma comment (lib, "d3dx10.lib")
-
-// STL
-#include <iostream>
-
-// global declarations
-IDXGISwapChain* swapchain;             // the pointer to the swap chain interface
-ID3D11Device* dev;                     // the pointer to our Direct3D device interface
-ID3D11DeviceContext* devcon;           // the pointer to our Direct3D device context (physical device)
-auto wind_name_g = (LPCSTR)"3DirectXNihBos";
-ID3D11RenderTargetView* backBuffer;		// variable that holds information about the render target
-
-// function prototypes
-void InitDX3D(HWND hWnd);     // sets up and initializes Direct3D
-void CleanDX3D(void);         // closes Direct3D and releases memory
-void RenderFrame(void);
-
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
+#include "ChiliWin.h"
 
 /*
 * Window procedure
@@ -125,6 +93,9 @@ int CALLBACK WinMain(
 	/* Initialize Directx3D */
 	InitDX3D(hwnd);
 
+	InitPipeline();
+	InitGraphic();
+
 	/*
 	* Looping the event message between the window and program
 	* https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmessage
@@ -216,15 +187,96 @@ void RenderFrame(void)
 {
 	devcon->ClearRenderTargetView(backBuffer, D3DXCOLOR(0.5f, 0.2f, 0.8f, 1.0f)); // fills the render target with a certain color
 
+	/* select which vertex buffer to be displayed */
+	UINT stride = sizeof(VERTEX);
+	UINT offset = 0;
+	devcon->IASetVertexBuffers(0, 1, &pVBuffer, &stride, &offset);
+
+	/* select primitive we are using */
+	devcon->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	/* draw the vertex buffer */
+	devcon->Draw(3, 0);
+
 	swapchain->Present(0, 0);	// "swap" the backbuffer to the frontbuffer to be shown
 
 	//devcon->ClearRenderTargetView(backBuffer, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
 	//swapchain->Present(0, 0);
 }
 
+void InitPipeline(void)
+{
+	ID3D10Blob* VS;
+	ID3D10Blob* PS;
+	/*
+	* https://learn.microsoft.com/en-us/windows/win32/direct3d11/d3dx11compilefromfile
+	* "Load the shaders1 file, then find the VShader function, compiles it as version 4.0 vertex shader and store the result in blob VS
+	*/
+	D3DX11CompileFromFile("shaders1.shader", 0, 0, "VShader", "vs_4_0", 0, 0, 0, &VS, 0, 0);
+	D3DX11CompileFromFile("shaders1.shader", 0, 0, "PShader", "ps_4_0", 0, 0, 0, &PS, 0, 0);
+
+	/*
+	* create the shader COM object
+	* 1st = address of the compiled shader/vertex
+	* 2nd = size of the file data
+	* 4th = address of the shader object
+	*/
+	dev->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, &pVS);
+	dev->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, &pPS);
+
+	/*
+	* set the shader to the active shader
+	*/
+	devcon->VSSetShader(pVS, 0, 0);
+	devcon->PSSetShader(pPS, 0, 0);
+
+	/*
+	* create input layout object
+	*/
+	D3D11_INPUT_ELEMENT_DESC ied[] =
+	{
+				{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+						{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+	};
+	dev->CreateInputLayout(ied, 2, VS->GetBufferPointer(), VS->GetBufferSize(), &pLayout);
+	devcon->IASetInputLayout(pLayout);
+}
+
+void InitGraphic(void)
+{
+	/* the triangle vertices */
+	VERTEX OurVertices[] =
+	{
+		{0.0f, 0.5f, 0.9f, D3DXCOLOR(1.0f, 0.0f, 0.2f, 1.0f)},
+		{0.45f, -0.5, 0.0f, D3DXCOLOR(1.0f, 0.3f, 0.0f, 1.0f)},
+		{-0.45f, -0.5f, 0.0f, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)}
+	};
+
+	/* create vertex buffer */
+	D3D11_BUFFER_DESC bd{};
+	ZeroMemory(&bd, sizeof(bd));
+
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.ByteWidth = sizeof(VERTEX) * 3;
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	dev->CreateBuffer(&bd, NULL, &pVBuffer);
+
+	D3D11_MAPPED_SUBRESOURCE ms;
+	devcon->Map(pVBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);
+	memcpy(ms.pData, OurVertices, sizeof(OurVertices));
+	devcon->Unmap(pVBuffer, NULL);
+}
+
 void CleanDX3D(void)
 {
 	swapchain->SetFullscreenState(FALSE, NULL); // turn off the fullscreen
+
+	/* release the shaders COM objects */
+	pVS->Release();
+	pPS->Release();
+
 	swapchain->Release();
 	backBuffer->Release();
 	dev->Release();
