@@ -185,7 +185,7 @@ void InitDX3D(HWND hWnd)
 
 void RenderFrame(void)
 {
-	devcon->ClearRenderTargetView(backBuffer, D3DXCOLOR(0.5f, 0.2f, 0.8f, 1.0f)); // fills the render target with a certain color
+	devcon->ClearRenderTargetView(backBuffer, D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f)); // fills the render target with a certain color
 
 	/* select which vertex buffer to be displayed */
 	UINT stride = sizeof(VERTEX);
@@ -197,7 +197,7 @@ void RenderFrame(void)
 	devcon->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_LINESTRIP);	// shows as line
 
 	/* draw the vertex buffer */
-	devcon->Draw(4, 0);
+	devcon->Draw(5, 0);
 
 	swapchain->Present(0, 0);	// "swap" the backbuffer to the frontbuffer to be shown
 
@@ -249,10 +249,16 @@ void InitGraphic(void)
 	/* locations/coordinates are in X,Y,Z */
 	VERTEX OurVertices[] =
 	{
-		{0.0f, 0.5f, 0.9f, D3DXCOLOR(1.0f, 0.0f, 0.2f, 1.0f)},
-		{0.45f, -0.5, 0.0f, D3DXCOLOR(1.0f, 0.3f, 0.0f, 1.0f)},
-		{-0.45f, -0.5f, 0.0f, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)},
-		{0.1f, -0.8f, 0.0f, D3DXCOLOR(0.0f, 0.5f, 1.0f, 1.0f)}
+		//{0.0f, 0.5f, 0.9f, D3DXCOLOR(1.0f, 0.0f, 0.2f, 1.0f)},
+		//{0.45f, -0.5, 0.0f, D3DXCOLOR(1.0f, 0.3f, 0.0f, 1.0f)},
+		//{-0.45f, -0.5f, 0.0f, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)},
+		//{0.1f, -0.8f, 0.0f, D3DXCOLOR(0.0f, 0.5f, 1.0f, 1.0f)}
+
+		{-0.5f, 0.8f, 0.0f, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)},
+		{0.0f, 0.5f, 0.0f, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)},
+		{0.5f, 0.8f, 0.0f, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)},
+		{0.0f, -0.6f, 0.0f, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)},
+		{-0.5f, 0.8f, 0.0f, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)},
 	};
 
 	/* create vertex buffer */
@@ -260,7 +266,7 @@ void InitGraphic(void)
 	ZeroMemory(&bd, sizeof(bd));
 
 	bd.Usage = D3D11_USAGE_DYNAMIC;
-	bd.ByteWidth = sizeof(VERTEX) * 4;
+	bd.ByteWidth = sizeof(VERTEX) * 5;
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
